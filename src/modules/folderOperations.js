@@ -1,27 +1,32 @@
-const fileOps = require('./src/libs/fileOperations');
-const folderOps = require('./src/modules/folderOperations');
+const fs = require('fs');
 
-// 1. Тестирование записи и чтения файла  
-fileOps.writeToFile('test.txt', 'Hello, Test!');
-console.log(fileOps.readFromFile('test.txt')); // Ожидание: 'Hello, Test!'  
+// 7. Функция создания папки  
+function createFolder(folderName) {
+    fs.mkdirSync(folderName);
+}
 
-// 2. Тестирование очистки файла  
-fileOps.clearFile('test.txt');
-console.log(fileOps.readFromFile('test.txt')); // Ожидание: ''  
+// 8. Функция удаления папки  
+function deleteFolder(folderName) {
+    fs.rmdirSync(folderName);
+}
 
-// 3. Тестирование записи и последующей очистки  
-fileOps.writeToFile('test.txt', 'Data to be cleaned!');
-fileOps.cleanFile('test.txt');
-console.log(fileOps.readFromFile('test.txt')); // Ожидание: 'data to be cleaned!'  
+// 9. Функция вывода путей к файлам  
+function listFiles(directory) {
+    return fs.readdirSync(directory).filter(file => !file.startsWith('.'));
+}
 
-// 4. Тестирование создания и удаления папки  
-folderOps.createFolder('testFolder');
-console.log(folderOps.listFiles('.')); // Проверить, что 'testFolder' в списке файлов  
-folderOps.deleteFolder('testFolder');
-console.log(folderOps.listFiles('.')); // Проверить, что 'testFolder' исчез  
+// 10. Функция удаления всех файлов и папок  
+function deleteAll(directory) {
+    const files = listFiles(directory);
+    files.forEach(file => {
+        const filePath = `${directory}/${file}`;
+        if (fs.lstatSync(filePath).isDirectory()) {
+            deleteFolder(filePath);
+        } else {
+            fs.unlinkSync(filePath);
+        }
+    });
+}
 
-// 5. Тестирование удаления всех файлов и папок  
-folderOps.createFolder('toDeleteFolder');
-fileOps.writeToFile('toDeleteFolder/testFile.txt', 'File to be deleted');
-folderOps.deleteAll('toDeleteFolder');
-console.log(folderOps.listFiles('toDeleteFolder')); // Ожидание: []ы
+// Экспорт функций  
+module.exports = { createFolder, deleteFolder, listFiles, deleteAll };
